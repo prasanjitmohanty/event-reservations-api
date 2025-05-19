@@ -46,7 +46,7 @@ export class EventService {
       throw new HttpException('Seat not found', HttpStatus.NOT_FOUND);
     }
 
-    // Bonus: Limit the number of seats a given user can hold in one event.
+    //Limit the number of seats a given user can hold in one event.
     const userHeldSeats = event.seats.filter(s => s.userId === userId && s.status === 'held');
     if (userHeldSeats.length >= this.maxHeldSeatsPerUser) {
       throw new HttpException(`User cannot hold more than ${this.maxHeldSeatsPerUser} seats`, HttpStatus.BAD_REQUEST);
@@ -63,55 +63,82 @@ export class EventService {
     }
   }
 
-  async reserveSeat(eventId: string, seatId: string, userId: string): Promise<any> {
+async reserveSeat(eventId: string, seatId: string, userId: string): Promise<{ message: string }> {
     const event = await this.getEvent(eventId);
     const seat = event.seats.find(s => s.seatId === seatId);
 
     if (!seat) {
-      throw new HttpException('Seat not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Seat not found', HttpStatus.NOT_FOUND);
     }
 
-    if (seat.status === 'held' && seat.userId === userId && seat.holdExpiresAt && seat.holdExpiresAt >= Date.now()) {
-      seat.status = 'reserved';
-      delete seat.holdExpiresAt; // Remove expiration as it's now permanently reserved
-      await this.saveEvent(event);
-      return { message: 'Seat reserved successfully' };
-    } else if (seat.status === 'reserved' && seat.userId === userId) {
-        return { message: 'Seat already reserved by you' };
-    } else if (seat.status === 'held' && seat.userId !== userId) {
-        throw new HttpException('Seat held by another user', HttpStatus.CONFLICT);
-    } else if (seat.status === 'held' && seat.holdExpiresAt && seat.holdExpiresAt < Date.now()) {
-        throw new HttpException('Hold on seat expired', HttpStatus.BAD_REQUEST);
-    } else if (seat.status === 'held' && !seat.holdExpiresAt) { // Case where holdExpiresAt might be undefined unexpectedly
-        throw new HttpException('Seat hold status is inconsistent', HttpStatus.INTERNAL_SERVER_ERROR);
-    } else {
-      throw new HttpException('Seat not held by user or hold expired', HttpStatus.BAD_REQUEST);
+    if (
+        seat.status === 'held' &&
+        seat.userId === userId &&
+        seat.holdExpiresAt &&
+        seat.holdExpiresAt >= Date.now()
+    ) {
+        seat.status = 'reserved';
+        delete seat.holdExpiresAt;
+        await this.saveEvent(event);
+        return { message: 'Seat reserved successfully' };
     }
-  }
+
+    if (seat.status === 'reserved' && seat.userId === userId) {
+        return { message: 'Seat already reserved by you' };
+    }
+
+    if (seat.status === 'held' && seat.userId !== userId) {
+        throw new HttpException('Seat held by another user', HttpStatus.CONFLICT);
+    }
+
+    if (seat.status === 'held' && seat.holdExpiresAt && seat.holdExpiresAt < Date.now()) {
+        throw new HttpException('Hold on seat expired', HttpStatus.BAD_REQUEST);
+    }
+
+    if (seat.status === 'held' && !seat.holdExpiresAt) {
+        throw new HttpException('Seat hold status is inconsistent', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    throw new HttpException('Seat not held by user or hold expired', HttpStatus.BAD_REQUEST);
+}
 
   async getAvailableSeats(eventId: string): Promise<Seat[]> {
     const event = await this.getEvent(eventId);
     return event.seats.filter(seat => seat.status === 'available' || (seat.status === 'held' && seat.holdExpiresAt && seat.holdExpiresAt < Date.now()));
   }
 
-  async refreshHold(eventId: string, seatId: string, userId: string): Promise<any> {
+async refreshHold(eventId: string, seatId: string, userId: string): Promise<{ message: string; holdExpiresAt: Date }> {
     const event = await this.getEvent(eventId);
     const seat = event.seats.find(s => s.seatId === seatId);
 
     if (!seat) {
-      throw new HttpException('Seat not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('Seat not found', HttpStatus.NOT_FOUND);
     }
 
-    if (seat.status === 'held' && seat.userId === userId && seat.holdExpiresAt && seat.holdExpiresAt >= Date.now()) {
-      seat.holdExpiresAt = Date.now() + this.holdDuration;
-      await this.saveEvent(event);
-      return { message: 'Hold refreshed successfully', holdExpiresAt: new Date(seat.holdExpiresAt) };
-    } else if (seat.status === 'held' && seat.userId === userId && seat.holdExpiresAt && seat.holdExpiresAt < Date.now()) {
-      throw new HttpException('Hold on seat expired, cannot refresh', HttpStatus.BAD_REQUEST);
-    } else if (seat.status !== 'held' || seat.userId !== userId) {
-      throw new HttpException('Seat not held by user', HttpStatus.BAD_REQUEST);
-    } else {
-      throw new HttpException('Cannot refresh hold on this seat', HttpStatus.BAD_REQUEST);
+    if (
+        seat.status === 'held' &&
+        seat.userId === userId &&
+        seat.holdExpiresAt &&
+        seat.holdExpiresAt >= Date.now()
+    ) {
+        seat.holdExpiresAt = Date.now() + this.holdDuration;
+        await this.saveEvent(event);
+        return { message: 'Hold refreshed successfully', holdExpiresAt: new Date(seat.holdExpiresAt) };
     }
-  }
+
+    if (
+        seat.status === 'held' &&
+        seat.userId === userId &&
+        seat.holdExpiresAt &&
+        seat.holdExpiresAt < Date.now()
+    ) {
+        throw new HttpException('Hold on seat expired, cannot refresh', HttpStatus.BAD_REQUEST);
+    }
+
+    if (seat.status !== 'held' || seat.userId !== userId) {
+        throw new HttpException('Seat not held by user', HttpStatus.BAD_REQUEST);
+    }
+
+    throw new HttpException('Cannot refresh hold on this seat', HttpStatus.BAD_REQUEST);
+}
 }
