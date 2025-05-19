@@ -4,6 +4,31 @@
 
 This document outlines the design for an Event Reservation System. The system provides a REST API to manage event seat reservations, allowing users to create events, view available seats, hold seats for a limited time, reserve held seats, and refresh their holds.
 
+## Running the project
+
+## Docker (* Docker Dekstop needs to be installed)
+```bash
+$ docker-cmpose up
+
+```
+
+## API Specification Swagger Endpoint
+http://localhost:3000/api
+
+
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
 ## 2. System Architecture
 
 The system is built using the following technologies:
