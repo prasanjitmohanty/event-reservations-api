@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { EventModule } from './event/event.module';
-import { EventController } from './event.controller';
-import { EventService } from './event.service';
+import { EventModule } from './event.module';
 
 @Module({
   imports: [EventModule],
-  controllers: [AppController, EventController],
-  providers: [ EventService],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule {}

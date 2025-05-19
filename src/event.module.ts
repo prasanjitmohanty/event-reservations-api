@@ -3,10 +3,12 @@ import { EventController } from './event.controller';
 import { EventService } from './event.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
-import * as redisStore from 'cache-manager-redis-store';
+import * as redisStore from 'cache-manager-ioredis';
+import { RedisModule } from './redis.module';
 
 @Module({
   imports: [
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true, // Make the configuration available globally
     }),
@@ -23,6 +25,6 @@ import * as redisStore from 'cache-manager-redis-store';
     }),
   ],
   controllers: [EventController],
-  providers: [EventService],
+  providers: [EventService]
 })
 export class EventModule {}

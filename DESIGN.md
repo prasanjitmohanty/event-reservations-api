@@ -50,7 +50,7 @@ The API exposes the following endpoints, rooted at `/` (e.g., `/events`):
         *   `201 Created`: If the event is created successfully.
         *   `400 Bad Request`: If input validation fails.
 *   **`POST /events/{eventId}/seats/{seatId}/hold`**:
-    *   **Description**: Allows a user to place a temporary hold on a specific seat for an event.
+    *   **Description**: Allows a user to place a temporary hold on a specific seat for an event. It uses Redis distributed locking to prevent double hold.
     *   **Path Parameters**:
         *   `eventId` (string, UUID format): The ID of the event.
         *   `seatId` (string): The ID of the seat.
