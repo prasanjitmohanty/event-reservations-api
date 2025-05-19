@@ -133,4 +133,5 @@ Input validation is handled globally using `ValidationPipe` with `class-validato
 ## 9. Future Considerations / Potential Improvements
 
 *   **Persistance storage**: Using postgresql or MySql
+*  Authentication and Authorization
 

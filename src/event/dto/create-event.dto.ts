@@ -1,6 +1,9 @@
-import { IsInt, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 
 export class CreateEventDto {
-  @IsInt()
-  numberOfSeats: number;
+    @IsNotEmpty()
+    name: string;
+
+    @IsInt()
+    numberOfSeats: number;
 }

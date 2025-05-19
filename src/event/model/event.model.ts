@@ -6,6 +6,7 @@ export interface Seat {
 }
 
 export interface Event {
+  name: string;        
   eventId: string;
   seats: Seat[];
   totalSeats: number;

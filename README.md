@@ -3,33 +3,17 @@
 
 This project is using NestJS(https://nestjs.com) A progressive Node.js framework for building efficient, reliable and scalable server-side applications. It helps elevate testability dependency injection system, code modularit. It uses Express.js under the hood.
 
-## Project setup
+## Running the project
 
-```bash
-$ npm install
-```
-
-## Compile and run the project
-
-## Docker
+## Docker (* Docker Dekstop needs to be installed)
 ```bash
 $ docker-cmpose up
 
 ```
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Swagger Endpoint
+## API Specification Swagger Endpoint
 http://localhost:3000/api
+
 
 ## Run tests
 

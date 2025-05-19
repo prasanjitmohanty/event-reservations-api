@@ -3,6 +3,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Seat, Event } from './event/model/event.model';
+import { CreateEventDto } from './event/dto/create-event.dto';
 
 @Injectable()
 export class EventService {
@@ -17,12 +18,13 @@ export class EventService {
     this.maxHeldSeatsPerUser = this.configService.get<number>('MAX_HELD_SEATS_PER_USER') || 5; // Default to 5 if not set
   }
 
-  async createEvent(eventId: string, numberOfSeats: number): Promise<void> {
+  async createEvent(eventId: string, createEventDto: CreateEventDto): Promise<void> {
+    const {name, numberOfSeats} = createEventDto;
     const seats: Seat[] = [];
     for (let i = 1; i <= numberOfSeats; i++) {
       seats.push({ seatId: `seat-${i}`, status: 'available' });
     }
-    const event: Event = { eventId, seats, totalSeats: numberOfSeats };
+    const event: Event = { eventId, seats, name, totalSeats: numberOfSeats };
     await this.cacheManager.set(`event:${eventId}`, event, 0); // Store indefinitely until explicitly removed or Redis persistence handles it
   }
 

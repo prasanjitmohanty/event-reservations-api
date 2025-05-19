@@ -17,12 +17,19 @@ export class EventController {
 
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
+/**
+ * Creates a new event with the specified number of seats.
+ * 
+ * Currently this method is not using authentication and authorization.
+ * Users with valid permission/role sholud create new events.
+ * 
+ */
   async createEvent(@Body() createEventDto: CreateEventDto) {
     if (createEventDto.numberOfSeats < 10 || createEventDto.numberOfSeats > 1000) {
       throw new HttpException('Number of seats must be between 10 and 1000', HttpStatus.BAD_REQUEST);
     }
     const eventId = uuidv4();
-    await this.eventService.createEvent(eventId, createEventDto.numberOfSeats);
+    await this.eventService.createEvent(eventId, createEventDto);
     return { eventId, message: 'Event created successfully' };
   }
 
